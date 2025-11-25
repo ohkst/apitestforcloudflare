@@ -308,11 +308,25 @@ const renderSection = (type: string, content: any, site: any, posts: any[]) => {
         </div>
       `;
     case 'location':
+      const address = content.location?.address || '주소를 입력해주세요';
+      const encodedAddress = encodeURIComponent(address);
       return `
         <div class="section">
           <h2>오시는 길</h2>
-          <div style="text-align: center;">
-            <p style="font-size: 1.2rem;">📍 ${content.location?.address || '주소를 입력해주세요'}</p>
+          <div style="max-width: 800px; margin: 0 auto;">
+            <p style="font-size: 1.2rem; text-align: center; margin-bottom: 2rem;">📍 ${address}</p>
+            ${address !== '주소를 입력해주세요' ? `
+              <div style="width: 100%; height: 400px; border-radius: 0.5rem; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                <iframe 
+                  width="100%" 
+                  height="100%" 
+                  frameborder="0" 
+                  style="border:0"
+                  src="https://www.google.com/maps?q=${encodedAddress}&output=embed"
+                  allowfullscreen>
+                </iframe>
+              </div>
+            ` : ''}
           </div>
         </div>
       `;

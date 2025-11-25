@@ -92,9 +92,9 @@ export const layout = (title: string, content: string) => `
 </html>
 `;
 
-export const landingTemplate = () => layout('PageMaker - 나만의 사이트 만들기', `
+export const landingTemplate = () => layout('DLDesign - 나만의 사이트 만들기', `
   <nav class="nav">
-    <a href="/">PageMaker</a>
+    <a href="/">DLDesign</a>
     <a href="/admin">대시보드</a>
   </nav>
   <div class="container" style="text-align: center; padding-top: 4rem;">
@@ -123,9 +123,9 @@ export const landingTemplate = () => layout('PageMaker - 나만의 사이트 만
   </div>
 `);
 
-export const dashboardTemplate = (sites: any[]) => layout('대시보드 - PageMaker', `
+export const dashboardTemplate = (sites: any[]) => layout('대시보드 - DLDesign', `
   <nav class="nav">
-    <a href="/">PageMaker</a>
+    <a href="/">DLDesign</a>
     <span>환영합니다, 사용자님</span>
   </nav>
   <div class="container">
@@ -411,7 +411,7 @@ export const userSiteTemplate = (site: any, content: any, posts: any[], layoutCo
   ${layoutConfig.map(type => renderSection(type.trim(), content, site, posts)).join('')}
   
   <footer style="text-align: center; padding: 2rem; background: #1f2937; color: #9ca3af; font-size: 0.9rem;">
-    <p>&copy; ${new Date().getFullYear()} ${site.title}. Powered by <a href="/" style="color: #d1d5db;">PageMaker</a></p>
+    <p>&copy; ${new Date().getFullYear()} ${site.title}. Powered by <a href="/" style="color: #d1d5db;">DLDesign</a></p>
   </footer>
 </body>
 </html>

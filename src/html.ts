@@ -78,11 +78,11 @@ export const layout = (title: string, content: string) => `
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>\${title}</title>
-  <style>\${styles}</style>
+  <title>${title}</title>
+  <style>${styles}</style>
 </head>
 <body>
-  \${content}
+  ${content}
 </body>
 </html>
 `;
@@ -129,27 +129,25 @@ export const dashboardTemplate = (sites: any[]) => layout('Dashboard - PageMaker
       <button onclick="document.getElementById('createModal').showModal()" class="btn">Create New Site</button>
     </div>
 
-    \${sites.length === 0 ? `
-  < div class= "card" style = "text-align: center; padding: 4rem;" >
-  <p style="color: var(--text-muted);" > You haven't created any sites yet.</p>
-  </div>
+    ${sites.length === 0 ? `
+      <div class="card" style="text-align: center; padding: 4rem;">
+        <p style="color: var(--text-muted);">You haven't created any sites yet.</p>
+      </div>
     ` : `
-< div style = "display: grid; gap: 1.5rem;" >
-\${
-  sites.map(site => `
+      <div style="display: grid; gap: 1.5rem;">
+        ${sites.map(site => `
           <div class="card" style="margin-bottom: 0; display: flex; justify-content: space-between; align-items: center;">
             <div>
-              <h3 style="margin: 0 0 0.5rem 0;">\${site.title}</h3>
-              <a href="/site/\${site.slug}" target="_blank" style="color: var(--primary);">/site/\${site.slug}</a>
+              <h3 style="margin: 0 0 0.5rem 0;">${site.title}</h3>
+              <a href="/site/${site.slug}" target="_blank" style="color: var(--primary);">/site/${site.slug}</a>
             </div>
             <div>
-              <a href="/admin/site/\${site.slug}/edit" class="btn" style="background-color: white; color: var(--text); border: 1px solid var(--border);">Edit</a>
+              <a href="/admin/site/${site.slug}/edit" class="btn" style="background-color: white; color: var(--text); border: 1px solid var(--border);">Edit</a>
             </div>
           </div>
-        `).join('')
-}
-</div>
-  `}
+        `).join('')}
+      </div>
+    `}
 
     <dialog id="createModal" style="border: none; border-radius: 1rem; padding: 2rem; width: 100%; max-width: 500px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
       <h2 style="margin-top: 0;">Create New Site</h2>

@@ -1,36 +1,39 @@
 // Template-specific section renderers
 export const renderSectionByTemplate = (
-    templateId: string,
-    type: string,
-    content: any,
-    site: any,
-    posts: any[]
+  templateId: string,
+  type: string,
+  content: any,
+  site: any,
+  posts: any[]
 ): string => {
-    const renderers: Record<string, Function> = {
-        default: renderDefaultSection,
-        modern: renderModernSection,
-        bold: renderBoldSection,
-        minimal: renderMinimalSection
-    };
+  const renderers: Record<string, Function> = {
+    default: renderDefaultSection,
+    modern: renderModernSection,
+    bold: renderBoldSection,
+    minimal: renderMinimalSection
+  };
 
-    const renderer = renderers[templateId] || renderers.default;
-    return renderer(type, content, site, posts);
+  const renderer = renderers[templateId] || renderers.default;
+  return renderer(type, content, site, posts);
 };
 
 // Default template (기존 디자인 유지)
 function renderDefaultSection(type: string, content: any, site: any, posts: any[]): string {
-    switch (type) {
-        case 'hero':
-            return `
-        <div class="hero">
+  switch (type) {
+    case 'hero':
+      const heroStyle = content.hero?.image
+        ? `background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('${content.hero.image}') center/cover;`
+        : 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);';
+      return `
+        <div class="hero" style="${heroStyle}">
           <div class="container">
             <h1>${content.hero?.headline || site.title}</h1>
             <p>${content.hero?.subheadline || '저희 웹사이트에 오신 것을 환영합니다'}</p>
           </div>
         </div>
       `;
-        case 'about':
-            return `
+    case 'about':
+      return `
         <div class="section">
           <div class="container">
             <h2>회사 소개</h2>
@@ -39,8 +42,8 @@ function renderDefaultSection(type: string, content: any, site: any, posts: any[
           </div>
         </div>
       `;
-        case 'business':
-            return `
+    case 'business':
+      return `
         <div class="section" style="background: #f8fafc;">
           <div class="container">
             <h2>${content.business?.title || '사업 내용'}</h2>
@@ -49,8 +52,8 @@ function renderDefaultSection(type: string, content: any, site: any, posts: any[
           </div>
         </div>
       `;
-        case 'product':
-            return `
+    case 'product':
+      return `
         <div class="section">
           <div class="container">
             <h2>상품 소개</h2>
@@ -64,10 +67,10 @@ function renderDefaultSection(type: string, content: any, site: any, posts: any[
           </div>
         </div>
       `;
-        case 'location':
-            const address = content.location?.address || '주소를 입력해주세요';
-            const encodedAddress = encodeURIComponent(address);
-            return `
+    case 'location':
+      const address = content.location?.address || '주소를 입력해주세요';
+      const encodedAddress = encodeURIComponent(address);
+      return `
         <div class="section" style="background: #f8fafc;">
           <div class="container">
             <h2>오시는 길</h2>
@@ -82,8 +85,8 @@ function renderDefaultSection(type: string, content: any, site: any, posts: any[
           </div>
         </div>
       `;
-        case 'board':
-            return `
+    case 'board':
+      return `
         <div class="section">
           <div class="container">
             <h2>공지사항</h2>
@@ -98,8 +101,8 @@ function renderDefaultSection(type: string, content: any, site: any, posts: any[
           </div>
         </div>
       `;
-        case 'contact':
-            return `
+    case 'contact':
+      return `
         <div class="section" style="background: #f8fafc;">
           <div class="container">
             <h2>문의하기</h2>
@@ -112,9 +115,9 @@ function renderDefaultSection(type: string, content: any, site: any, posts: any[
           </div>
         </div>
       `;
-        default:
-            return '';
-    }
+    default:
+      return '';
+  }
 }
 
 // Modern, Bold, Minimal 템플릿은 동일한 구조에 CSS만 다름

@@ -70,6 +70,11 @@ export const styles = `
     text-decoration: none;
     font-weight: 600;
   }
+  @media (max-width: 600px) {
+    .container { padding: 1rem; }
+    .nav { padding: 1rem; }
+    h1 { font-size: 2rem; }
+  }
 `;
 
 export const layout = (title: string, content: string) => `
@@ -167,42 +172,194 @@ export const dashboardTemplate = (sites: any[]) => layout('Dashboard - PageMaker
   </div>
 `);
 
-export const editorTemplate = (site: any, content: any) => layout(`Edit ${site.title}`, `
+export const editorTemplate = (site: any, content: any, posts: any[], layoutConfig: string[]) => layout(`Edit ${site.title}`, `
   <nav class="nav">
     <a href="/admin">← Back to Dashboard</a>
     <span>Editing: <strong>${site.title}</strong></span>
   </nav>
   <div class="container">
-    <form action="/api/admin/sites/${site.slug}/content" method="POST">
-      <div class="card">
-        <h2>Hero Section</h2>
-        <label>Headline</label>
-        <input type="text" name="hero_headline" value="${content.hero?.headline || ''}" placeholder="Catchy title for your business" />
-        
-        <label>Subheadline</label>
-        <input type="text" name="hero_subheadline" value="${content.hero?.subheadline || ''}" placeholder="Short description of what you do" />
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+      <div>
+        <div class="card" style="background: #f0f9ff; border: 1px solid #bae6fd;">
+          <h2>Layout Settings</h2>
+          <p style="font-size: 0.9rem; color: var(--text-muted);">Reorder sections by dragging (not implemented) or editing the list below. Separate by comma.</p>
+          <form action="/api/admin/sites/${site.slug}/layout" method="POST">
+             <label>Section Order</label>
+             <input type="text" name="order" value="${layoutConfig.join(',')}" placeholder="hero,about,business,product,location,board,contact" />
+             <button type="submit" class="btn" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Update Layout</button>
+          </form>
+        </div>
+
+        <form action="/api/admin/sites/${site.slug}/content" method="POST">
+          <div class="card">
+            <h2>Hero Section</h2>
+            <label>Headline</label>
+            <input type="text" name="hero_headline" value="${content.hero?.headline || ''}" />
+            <label>Subheadline</label>
+            <input type="text" name="hero_subheadline" value="${content.hero?.subheadline || ''}" />
+          </div>
+
+          <div class="card">
+            <h2>About Section</h2>
+            <label>About Text</label>
+            <textarea name="about_text" rows="4">${content.about?.text || ''}</textarea>
+          </div>
+
+          <div class="card">
+            <h2>Business Content</h2>
+            <label>Title</label>
+            <input type="text" name="business_title" value="${content.business?.title || ''}" />
+            <label>Content</label>
+            <textarea name="business_content" rows="4">${content.business?.content || ''}</textarea>
+          </div>
+
+          <div class="card">
+            <h2>Products</h2>
+            <label>Items (Format: Name|Price, one per line)</label>
+            <textarea name="product_items" rows="5" placeholder="Coffee|3.50\nBagel|2.00">${(content.product?.items || []).map((i: any) => `${i.name}|${i.price}`).join('\n')}</textarea>
+          </div>
+
+          <div class="card">
+            <h2>Location</h2>
+            <label>Address</label>
+            <input type="text" name="location_address" value="${content.location?.address || ''}" />
+          </div>
+
+          <div class="card">
+            <h2>Contact Settings</h2>
+            <label>Contact Email</label>
+            <input type="email" name="contact_email" value="${content.contact?.email || ''}" />
+          </div>
+
+          <button type="submit" class="btn" style="width: 100%;">Save All Changes</button>
+        </form>
       </div>
 
-      <div class="card">
-        <h2>About Section</h2>
-        <label>About Text</label>
-        <textarea name="about_text" rows="5" placeholder="Tell your story...">${content.about?.text || ''}</textarea>
-      </div>
+      <div>
+        <div class="card">
+          <h2>News / Board</h2>
+          <form action="/api/admin/sites/${site.slug}/posts" method="POST" style="margin-bottom: 2rem;">
+            <label>Title</label>
+            <input type="text" name="title" required />
+            <label>Content</label>
+            <textarea name="content" rows="3" required></textarea>
+            <button type="submit" class="btn" style="width: 100%;">Post News</button>
+          </form>
 
-      <div class="card">
-        <h2>Contact Settings</h2>
-        <label>Contact Email (where leads are sent)</label>
-        <input type="email" name="contact_email" value="${content.contact?.email || ''}" placeholder="you@example.com" />
+          <h3>Recent Posts</h3>
+          ${posts.length === 0 ? '<p style="color: var(--text-muted);">No posts yet.</p>' : `
+            <ul style="list-style: none; padding: 0;">
+              ${posts.map(post => `
+                <li style="border-bottom: 1px solid var(--border); padding: 0.5rem 0;">
+                  <strong>${post.title}</strong>
+                  <p style="margin: 0.25rem 0; font-size: 0.9rem; color: var(--text-muted);">${post.content}</p>
+                </li>
+              `).join('')}
+            </ul>
+          `}
+        </div>
       </div>
-
-      <div style="position: sticky; bottom: 2rem; display: flex; justify-content: flex-end;">
-        <button type="submit" class="btn" style="box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">Save Changes</button>
-      </div>
-    </form>
+    </div>
   </div>
 `);
 
-export const userSiteTemplate = (site: any, content: any) => `
+const renderSection = (type: string, content: any, site: any, posts: any[]) => {
+  switch (type) {
+    case 'hero':
+      return `
+        <div class="hero">
+          <h1>${content.hero?.headline || site.title}</h1>
+          <p>${content.hero?.subheadline || 'Welcome to our website'}</p>
+        </div>
+      `;
+    case 'about':
+      return `
+        <div class="section">
+          <h2>About Us</h2>
+          <div style="max-width: 700px; margin: 0 auto; text-align: center;">
+            <p>${content.about?.text || 'Add your about text in the editor.'}</p>
+          </div>
+        </div>
+      `;
+    case 'business':
+      return `
+        <div class="section">
+          <h2>${content.business?.title || 'Our Business'}</h2>
+          <div style="max-width: 700px; margin: 0 auto; text-align: center;">
+            <p>${content.business?.content || 'Information about our business.'}</p>
+          </div>
+        </div>
+      `;
+    case 'product':
+      return `
+        <div class="section">
+          <h2>Our Products</h2>
+          <div class="grid">
+            ${(content.product?.items || []).length > 0 ?
+          content.product.items.map((item: any) => `
+                <div class="card" style="text-align: center;">
+                  <h3>${item.name}</h3>
+                  <p style="font-size: 1.25rem; font-weight: bold; color: var(--primary);">${item.price}</p>
+                </div>
+              `).join('') :
+          '<p style="text-align: center; width: 100%;">No products listed yet.</p>'
+        }
+          </div>
+        </div>
+      `;
+    case 'location':
+      return `
+        <div class="section">
+          <h2>Location</h2>
+          <div style="text-align: center;">
+            <p style="font-size: 1.2rem;">📍 ${content.location?.address || 'Contact us for location'}</p>
+          </div>
+        </div>
+      `;
+    case 'board':
+      return `
+        <div class="section">
+          <h2>Latest News</h2>
+          <div class="grid">
+            ${posts.length > 0 ?
+          posts.map(post => `
+                <div class="card">
+                  <h3>${post.title}</h3>
+                  <p style="color: #666; font-size: 0.9rem;">${new Date(post.created_at).toLocaleDateString()}</p>
+                  <p>${post.content}</p>
+                </div>
+              `).join('') :
+          '<p style="text-align: center; width: 100%;">No news yet.</p>'
+        }
+          </div>
+        </div>
+      `;
+    case 'contact':
+      return `
+        <div class="section" style="border-bottom: none;">
+          <h2>Contact Us</h2>
+          <div class="contact-form">
+            <form action="/api/site/${site.slug}/lead" method="POST">
+              <label>Name</label>
+              <input type="text" name="name" required />
+              
+              <label>Email</label>
+              <input type="email" name="email" required />
+              
+              <label>Message</label>
+              <textarea name="message" rows="4" required></textarea>
+              
+              <button type="submit">Send Message</button>
+            </form>
+          </div>
+        </div>
+      `;
+    default:
+      return '';
+  }
+};
+
+export const userSiteTemplate = (site: any, content: any, posts: any[], layoutConfig: string[]) => `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -210,51 +367,51 @@ export const userSiteTemplate = (site: any, content: any) => `
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${site.title}</title>
   <style>
-    body { font-family: sans-serif; margin: 0; line-height: 1.6; color: #333; }
-    .hero { background: #f3f4f6; padding: 4rem 2rem; text-align: center; }
-    .hero h1 { font-size: 3rem; margin-bottom: 1rem; color: #111; }
-    .hero p { font-size: 1.5rem; color: #555; max-width: 800px; margin: 0 auto; }
-    .container { max-width: 900px; margin: 0 auto; padding: 4rem 2rem; }
-    .section { margin-bottom: 4rem; }
-    .contact-form { background: #fff; padding: 2rem; border: 1px solid #eee; border-radius: 8px; }
-    input, textarea { width: 100%; padding: 0.8rem; margin-bottom: 1rem; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-    button { background: #2563eb; color: white; border: none; padding: 1rem 2rem; font-size: 1.1rem; border-radius: 4px; cursor: pointer; width: 100%; }
-    button:hover { background: #1d4ed8; }
+    :root {
+      --primary: #2563eb;
+      --text: #1f2937;
+      --bg: #ffffff;
+      --bg-alt: #f3f4f6;
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; line-height: 1.6; color: var(--text); }
+    
+    /* Responsive Layout */
+    .container { max-width: 1000px; margin: 0 auto; padding: 0 1.5rem; }
+    
+    /* Hero */
+    .hero { background: var(--bg-alt); padding: 5rem 1.5rem; text-align: center; }
+    .hero h1 { font-size: clamp(2rem, 5vw, 3.5rem); margin: 0 0 1rem 0; color: #111; }
+    .hero p { font-size: 1.25rem; color: #4b5563; max-width: 600px; margin: 0 auto; }
+    
+    /* Sections */
+    .section { padding: 4rem 0; border-bottom: 1px solid #e5e7eb; }
+    .section h2 { font-size: 2rem; text-align: center; margin-bottom: 3rem; color: #111; }
+    
+    /* Grid for Products/News */
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; }
+    
+    /* Cards */
+    .card { background: white; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 1.5rem; }
+    .card h3 { margin-top: 0; }
+    
+    /* Contact Form */
+    .contact-form { max-width: 500px; margin: 0 auto; }
+    input, textarea { width: 100%; padding: 0.75rem; margin-bottom: 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box; }
+    button { background: var(--primary); color: white; border: none; padding: 1rem 2rem; font-size: 1.1rem; border-radius: 0.375rem; cursor: pointer; width: 100%; }
+    button:hover { opacity: 0.9; }
+
+    /* Mobile Tweaks */
+    @media (max-width: 600px) {
+      .section { padding: 3rem 0; }
+      .hero { padding: 3rem 1rem; }
+    }
   </style>
 </head>
 <body>
-  <div class="hero">
-    <h1>${content.hero?.headline || site.title}</h1>
-    <p>${content.hero?.subheadline || 'Welcome to our website'}</p>
-  </div>
-
-  <div class="container">
-    <div class="section">
-      <h2>About Us</h2>
-      <p>${content.about?.text || 'Add your about text in the editor.'}</p>
-    </div>
-
-    <div class="section">
-      <h2>Contact Us</h2>
-      <div class="contact-form">
-        <form action="/api/site/${site.slug}/lead" method="POST">
-          <label>Name</label>
-          <input type="text" name="name" required />
-          
-          <label>Email</label>
-          <input type="email" name="email" required />
-          
-          <label>Message</label>
-          <textarea name="message" rows="4" required></textarea>
-          
-          <button type="submit">Send Message</button>
-        </form>
-      </div>
-    </div>
-  </div>
+  ${layoutConfig.map(type => renderSection(type.trim(), content, site, posts)).join('')}
   
-  <footer style="text-align: center; padding: 2rem; background: #111; color: #666; font-size: 0.9rem;">
-    Powered by <a href="/" style="color: #888;">PageMaker</a>
+  <footer style="text-align: center; padding: 2rem; background: #1f2937; color: #9ca3af; font-size: 0.9rem;">
+    <p>&copy; ${new Date().getFullYear()} ${site.title}. Powered by <a href="/" style="color: #d1d5db;">PageMaker</a></p>
   </footer>
 </body>
 </html>

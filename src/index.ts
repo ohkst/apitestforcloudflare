@@ -19,7 +19,6 @@ app.get('/', (c) => {
 // --- Admin / Dashboard Routes ---
 
 app.get('/admin', async (c) => {
-    // In a real app, we would check auth here. For demo, we assume user_id = 1.
     const { results } = await c.env.DB.prepare('SELECT * FROM sites WHERE user_id = ? ORDER BY created_at DESC').bind(1).all()
     return c.html(dashboardTemplate(results))
 })
@@ -30,19 +29,27 @@ app.post('/api/admin/sites', async (c) => {
     const slug = body['slug'] as string
 
     try {
-        await c.env.DB.prepare('INSERT INTO sites (user_id, slug, title) VALUES (?, ?, ?)')
-            .bind(1, slug, title)
+        // Default layout
+        const defaultLayout = ['hero', 'about', 'business', 'product', 'board', 'location', 'contact'];
+
+        await c.env.DB.prepare('INSERT INTO sites (user_id, slug, title, theme_config) VALUES (?, ?, ?, ?)')
+            .bind(1, slug, title, JSON.stringify({ order: defaultLayout }))
             .run()
 
         // Initialize default content
         const site = await c.env.DB.prepare('SELECT id FROM sites WHERE slug = ?').bind(slug).first()
         if (site) {
-            await c.env.DB.prepare('INSERT INTO site_content (site_id, section_type, content) VALUES (?, ?, ?)')
-                .bind(site.id, 'hero', JSON.stringify({ headline: title, subheadline: 'Welcome to our new site' }))
-                .run()
-            await c.env.DB.prepare('INSERT INTO site_content (site_id, section_type, content) VALUES (?, ?, ?)')
-                .bind(site.id, 'about', JSON.stringify({ text: 'We are a new business.' }))
-                .run()
+            const defaults = [
+                { type: 'hero', content: { headline: title, subheadline: 'Welcome to our new site' } },
+                { type: 'about', content: { text: 'We are a new business.' } },
+                { type: 'business', content: { title: 'Our Services', content: 'We provide excellent services.' } },
+                { type: 'product', content: { items: [] } },
+                { type: 'location', content: { address: 'Contact us for location.' } },
+                { type: 'contact', content: { email: 'admin@example.com' } }
+            ];
+
+            const stmt = c.env.DB.prepare('INSERT INTO site_content (site_id, section_type, content) VALUES (?, ?, ?)');
+            await c.env.DB.batch(defaults.map(d => stmt.bind(site.id, d.type, JSON.stringify(d.content))));
         }
 
         return c.redirect('/admin')
@@ -58,6 +65,7 @@ app.get('/admin/site/:slug/edit', async (c) => {
     if (!site) return c.text('Site not found', 404)
 
     const contentRows = await c.env.DB.prepare('SELECT section_type, content FROM site_content WHERE site_id = ?').bind(site.id).all()
+    const posts = await c.env.DB.prepare('SELECT * FROM posts WHERE site_id = ? ORDER BY created_at DESC').bind(site.id).all()
 
     const content: any = {}
     contentRows.results.forEach((row: any) => {
@@ -68,7 +76,38 @@ app.get('/admin/site/:slug/edit', async (c) => {
         }
     })
 
-    return c.html(editorTemplate(site, content))
+    let layoutConfig: string[] = [];
+    try {
+        const theme = JSON.parse(site.theme_config as string || '{}');
+        layoutConfig = theme.order || ['hero', 'about', 'business', 'product', 'board', 'location', 'contact'];
+    } catch (e) {
+        layoutConfig = ['hero', 'about', 'business', 'product', 'board', 'location', 'contact'];
+    }
+
+    return c.html(editorTemplate(site, content, posts.results, layoutConfig))
+})
+
+app.post('/api/admin/sites/:slug/layout', async (c) => {
+    const slug = c.req.param('slug')
+    const body = await c.req.parseBody()
+    const orderStr = body['order'] as string;
+    const order = orderStr.split(',').map(s => s.trim()).filter(s => s);
+
+    const site = await c.env.DB.prepare('SELECT id, theme_config FROM sites WHERE slug = ?').bind(slug).first()
+    if (!site) return c.text('Site not found', 404)
+
+    let theme: any = {};
+    try {
+        theme = JSON.parse(site.theme_config as string || '{}');
+    } catch (e) { }
+
+    theme.order = order;
+
+    await c.env.DB.prepare('UPDATE sites SET theme_config = ? WHERE id = ?')
+        .bind(JSON.stringify(theme), site.id)
+        .run();
+
+    return c.redirect(`/admin/site/${slug}/edit`)
 })
 
 app.post('/api/admin/sites/:slug/content', async (c) => {
@@ -78,42 +117,43 @@ app.post('/api/admin/sites/:slug/content', async (c) => {
     const site = await c.env.DB.prepare('SELECT id FROM sites WHERE slug = ?').bind(slug).first()
     if (!site) return c.text('Site not found', 404)
 
-    // Update Hero
-    const heroContent = JSON.stringify({
-        headline: body['hero_headline'],
-        subheadline: body['hero_subheadline']
-    })
-
-    // Update About
-    const aboutContent = JSON.stringify({
-        text: body['about_text']
-    })
-
-    // Update Contact
-    const contactContent = JSON.stringify({
-        email: body['contact_email']
-    })
-
-    // Upsert logic (simplified: delete and insert, or update)
-    // Ideally we use UPSERT or check existence. For demo, let's just update if exists or insert.
-    // Actually, let's just delete old content for these sections and re-insert to be lazy/safe
-    // BUT that changes IDs. Better to UPDATE.
-
-    await c.env.DB.prepare(`
-    UPDATE site_content SET content = ? WHERE site_id = ? AND section_type = 'hero'
-  `).bind(heroContent, site.id).run()
-
-    await c.env.DB.prepare(`
-    UPDATE site_content SET content = ? WHERE site_id = ? AND section_type = 'about'
-  `).bind(aboutContent, site.id).run()
-
-    // Check if contact section exists, if not insert
-    const contactExists = await c.env.DB.prepare("SELECT 1 FROM site_content WHERE site_id = ? AND section_type = 'contact'").bind(site.id).first()
-    if (contactExists) {
-        await c.env.DB.prepare(`UPDATE site_content SET content = ? WHERE site_id = ? AND section_type = 'contact'`).bind(contactContent, site.id).run()
-    } else {
-        await c.env.DB.prepare(`INSERT INTO site_content (site_id, section_type, content) VALUES (?, 'contact', ?)`).bind(site.id, contactContent).run()
+    // Helper to update section
+    const updateSection = async (type: string, data: any) => {
+        const json = JSON.stringify(data);
+        const exists = await c.env.DB.prepare('SELECT 1 FROM site_content WHERE site_id = ? AND section_type = ?').bind(site.id, type).first();
+        if (exists) {
+            await c.env.DB.prepare('UPDATE site_content SET content = ? WHERE site_id = ? AND section_type = ?').bind(json, site.id, type).run();
+        } else {
+            await c.env.DB.prepare('INSERT INTO site_content (site_id, section_type, content) VALUES (?, ?, ?)').bind(site.id, type, json).run();
+        }
     }
+
+    await updateSection('hero', { headline: body['hero_headline'], subheadline: body['hero_subheadline'] });
+    await updateSection('about', { text: body['about_text'] });
+    await updateSection('business', { title: body['business_title'], content: body['business_content'] });
+    await updateSection('location', { address: body['location_address'] });
+    await updateSection('contact', { email: body['contact_email'] });
+
+    // Product items
+    const productText = body['product_items'] as string || '';
+    const productItems = productText.split('\n').map(line => {
+        const [name, price] = line.split('|');
+        return { name: name?.trim(), price: price?.trim() };
+    }).filter(item => item.name);
+    await updateSection('product', { items: productItems });
+
+    return c.redirect(`/admin/site/${slug}/edit`)
+})
+
+app.post('/api/admin/sites/:slug/posts', async (c) => {
+    const slug = c.req.param('slug')
+    const body = await c.req.parseBody()
+    const site = await c.env.DB.prepare('SELECT id FROM sites WHERE slug = ?').bind(slug).first()
+    if (!site) return c.text('Site not found', 404)
+
+    await c.env.DB.prepare('INSERT INTO posts (site_id, title, content) VALUES (?, ?, ?)')
+        .bind(site.id, body['title'], body['content'])
+        .run()
 
     return c.redirect(`/admin/site/${slug}/edit`)
 })
@@ -127,6 +167,7 @@ app.get('/site/:slug', async (c) => {
     if (!site) return c.text('Site not found', 404)
 
     const contentRows = await c.env.DB.prepare('SELECT section_type, content FROM site_content WHERE site_id = ?').bind(site.id).all()
+    const posts = await c.env.DB.prepare('SELECT * FROM posts WHERE site_id = ? ORDER BY created_at DESC LIMIT 5').bind(site.id).all()
 
     const content: any = {}
     contentRows.results.forEach((row: any) => {
@@ -137,7 +178,15 @@ app.get('/site/:slug', async (c) => {
         }
     })
 
-    return c.html(userSiteTemplate(site, content))
+    let layoutConfig: string[] = [];
+    try {
+        const theme = JSON.parse(site.theme_config as string || '{}');
+        layoutConfig = theme.order || ['hero', 'about', 'business', 'product', 'board', 'location', 'contact'];
+    } catch (e) {
+        layoutConfig = ['hero', 'about', 'business', 'product', 'board', 'location', 'contact'];
+    }
+
+    return c.html(userSiteTemplate(site, content, posts.results, layoutConfig))
 })
 
 app.post('/api/site/:slug/lead', async (c) => {
@@ -152,9 +201,11 @@ app.post('/api/site/:slug/lead', async (c) => {
         .run()
 
     return c.html(`
-    <h1>Message Sent!</h1>
-    <p>Thank you for contacting us.</p>
-    <a href="/site/${slug}">Back to site</a>
+    <div style="font-family: sans-serif; text-align: center; padding: 4rem;">
+        <h1>Message Sent!</h1>
+        <p>Thank you for contacting us.</p>
+        <a href="/site/${slug}">Back to site</a>
+    </div>
   `)
 })
 

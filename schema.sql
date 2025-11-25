@@ -17,6 +17,7 @@ CREATE TABLE sites (
   user_id INTEGER NOT NULL,
   slug TEXT UNIQUE NOT NULL,
   title TEXT NOT NULL,
+  template_id TEXT DEFAULT 'default',
   theme_config TEXT DEFAULT '{}', -- JSON string
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id)

@@ -27,13 +27,14 @@ app.post('/api/admin/sites', async (c) => {
     const body = await c.req.parseBody()
     const title = body['title'] as string
     const slug = body['slug'] as string
+    const templateId = body['template_id'] as string || 'default'
 
     try {
         // Default layout
         const defaultLayout = ['hero', 'about', 'business', 'product', 'board', 'location', 'contact'];
 
-        await c.env.DB.prepare('INSERT INTO sites (user_id, slug, title, theme_config) VALUES (?, ?, ?, ?)')
-            .bind(1, slug, title, JSON.stringify({ order: defaultLayout }))
+        await c.env.DB.prepare('INSERT INTO sites (user_id, slug, title, template_id, theme_config) VALUES (?, ?, ?, ?, ?)')
+            .bind(1, slug, title, templateId, JSON.stringify({ order: defaultLayout }))
             .run()
 
         // Initialize default content
@@ -128,9 +129,20 @@ app.post('/api/admin/sites/:slug/content', async (c) => {
         }
     }
 
-    await updateSection('hero', { headline: body['hero_headline'], subheadline: body['hero_subheadline'] });
-    await updateSection('about', { text: body['about_text'] });
-    await updateSection('business', { title: body['business_title'], content: body['business_content'] });
+    await updateSection('hero', {
+        headline: body['hero_headline'],
+        subheadline: body['hero_subheadline'],
+        image: body['hero_image']
+    });
+    await updateSection('about', {
+        text: body['about_text'],
+        image: body['about_image']
+    });
+    await updateSection('business', {
+        title: body['business_title'],
+        content: body['business_content'],
+        image: body['business_image']
+    });
     await updateSection('location', { address: body['location_address'] });
     await updateSection('contact', { email: body['contact_email'] });
 

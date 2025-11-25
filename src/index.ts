@@ -40,11 +40,11 @@ app.post('/api/admin/sites', async (c) => {
         const site = await c.env.DB.prepare('SELECT id FROM sites WHERE slug = ?').bind(slug).first()
         if (site) {
             const defaults = [
-                { type: 'hero', content: { headline: title, subheadline: 'Welcome to our new site' } },
-                { type: 'about', content: { text: 'We are a new business.' } },
-                { type: 'business', content: { title: 'Our Services', content: 'We provide excellent services.' } },
+                { type: 'hero', content: { headline: title, subheadline: '새로운 웹사이트에 오신 것을 환영합니다' } },
+                { type: 'about', content: { text: '우리는 새로운 비즈니스입니다.' } },
+                { type: 'business', content: { title: '사업 내용', content: '우수한 서비스를 제공합니다.' } },
                 { type: 'product', content: { items: [] } },
-                { type: 'location', content: { address: 'Contact us for location.' } },
+                { type: 'location', content: { address: '위치 정보를 입력해주세요.' } },
                 { type: 'contact', content: { email: 'admin@example.com' } }
             ];
 
@@ -202,9 +202,9 @@ app.post('/api/site/:slug/lead', async (c) => {
 
     return c.html(`
     <div style="font-family: sans-serif; text-align: center; padding: 4rem;">
-        <h1>Message Sent!</h1>
-        <p>Thank you for contacting us.</p>
-        <a href="/site/${slug}">Back to site</a>
+        <h1>메시지가 전송되었습니다!</h1>
+        <p>문의해주셔서 감사합니다.</p>
+        <a href="/site/${slug}">사이트로 돌아가기</a>
     </div>
   `)
 })

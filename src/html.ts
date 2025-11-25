@@ -79,7 +79,7 @@ export const styles = `
 
 export const layout = (title: string, content: string) => `
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -92,51 +92,51 @@ export const layout = (title: string, content: string) => `
 </html>
 `;
 
-export const landingTemplate = () => layout('PageMaker - Create Your Site', `
+export const landingTemplate = () => layout('PageMaker - 나만의 사이트 만들기', `
   <nav class="nav">
     <a href="/">PageMaker</a>
-    <a href="/admin">Dashboard</a>
+    <a href="/admin">대시보드</a>
   </nav>
   <div class="container" style="text-align: center; padding-top: 4rem;">
     <h1 style="font-size: 3.5rem; margin-bottom: 1.5rem; background: linear-gradient(to right, #2563eb, #9333ea); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-      Launch Your Business Online
+      비즈니스를 온라인으로 시작하세요
     </h1>
     <p style="font-size: 1.25rem; color: var(--text-muted); margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
-      Create a professional marketing page for your small business in minutes. No coding required.
+      몇 분 만에 중소기업을 위한 전문적인 마케팅 페이지를 만드세요. 코딩이 필요 없습니다.
     </p>
-    <a href="/admin" class="btn" style="font-size: 1.25rem; padding: 1rem 2rem;">Get Started for Free</a>
+    <a href="/admin" class="btn" style="font-size: 1.25rem; padding: 1rem 2rem;">무료로 시작하기</a>
     
     <div style="margin-top: 4rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; text-align: left;">
       <div class="card">
-        <h3>🚀 Fast & Simple</h3>
-        <p>Just fill out a form and your site is live instantly.</p>
+        <h3>🚀 빠르고 간편함</h3>
+        <p>양식만 작성하면 사이트가 즉시 게시됩니다.</p>
       </div>
       <div class="card">
-        <h3>📱 Mobile Optimized</h3>
-        <p>Looks great on every device, automatically.</p>
+        <h3>📱 모바일 최적화</h3>
+        <p>모든 기기에서 자동으로 멋지게 보입니다.</p>
       </div>
       <div class="card">
-        <h3>💌 Lead Collection</h3>
-        <p>Built-in contact forms to capture customer interest.</p>
+        <h3>💌 리드(문의) 수집</h3>
+        <p>고객의 관심을 포착하기 위한 문의 양식이 내장되어 있습니다.</p>
       </div>
     </div>
   </div>
 `);
 
-export const dashboardTemplate = (sites: any[]) => layout('Dashboard - PageMaker', `
+export const dashboardTemplate = (sites: any[]) => layout('대시보드 - PageMaker', `
   <nav class="nav">
     <a href="/">PageMaker</a>
-    <span>Welcome, User</span>
+    <span>환영합니다, 사용자님</span>
   </nav>
   <div class="container">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-      <h1>Your Sites</h1>
-      <button onclick="document.getElementById('createModal').showModal()" class="btn">Create New Site</button>
+      <h1>내 사이트</h1>
+      <button onclick="document.getElementById('createModal').showModal()" class="btn">새 사이트 만들기</button>
     </div>
 
     ${sites.length === 0 ? `
       <div class="card" style="text-align: center; padding: 4rem;">
-        <p style="color: var(--text-muted);">You haven't created any sites yet.</p>
+        <p style="color: var(--text-muted);">아직 생성된 사이트가 없습니다.</p>
       </div>
     ` : `
       <div style="display: grid; gap: 1.5rem;">
@@ -147,7 +147,7 @@ export const dashboardTemplate = (sites: any[]) => layout('Dashboard - PageMaker
               <a href="/site/${site.slug}" target="_blank" style="color: var(--primary);">/site/${site.slug}</a>
             </div>
             <div>
-              <a href="/admin/site/${site.slug}/edit" class="btn" style="background-color: white; color: var(--text); border: 1px solid var(--border);">Edit</a>
+              <a href="/admin/site/${site.slug}/edit" class="btn" style="background-color: white; color: var(--text); border: 1px solid var(--border);">편집</a>
             </div>
           </div>
         `).join('')}
@@ -155,99 +155,99 @@ export const dashboardTemplate = (sites: any[]) => layout('Dashboard - PageMaker
     `}
 
     <dialog id="createModal" style="border: none; border-radius: 1rem; padding: 2rem; width: 100%; max-width: 500px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
-      <h2 style="margin-top: 0;">Create New Site</h2>
+      <h2 style="margin-top: 0;">새 사이트 생성</h2>
       <form method="POST" action="/api/admin/sites">
-        <label>Site Title</label>
-        <input type="text" name="title" required placeholder="e.g. Joe's Coffee" />
+        <label>사이트 제목</label>
+        <input type="text" name="title" required placeholder="예: 철수의 커피숍" />
         
-        <label>URL Slug</label>
-        <input type="text" name="slug" required placeholder="e.g. joes-coffee" pattern="[a-z0-9-]+" title="Lowercase letters, numbers, and hyphens only" />
+        <label>URL 슬러그 (주소)</label>
+        <input type="text" name="slug" required placeholder="예: chulsu-coffee" pattern="[a-z0-9-]+" title="영문 소문자, 숫자, 하이픈만 가능합니다" />
         
         <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
-          <button type="button" onclick="this.closest('dialog').close()" class="btn" style="background-color: transparent; color: var(--text-muted);">Cancel</button>
-          <button type="submit" class="btn">Create Site</button>
+          <button type="button" onclick="this.closest('dialog').close()" class="btn" style="background-color: transparent; color: var(--text-muted);">취소</button>
+          <button type="submit" class="btn">사이트 생성</button>
         </div>
       </form>
     </dialog>
   </div>
 `);
 
-export const editorTemplate = (site: any, content: any, posts: any[], layoutConfig: string[]) => layout(`Edit ${site.title}`, `
+export const editorTemplate = (site: any, content: any, posts: any[], layoutConfig: string[]) => layout(`${site.title} 편집`, `
   <nav class="nav">
-    <a href="/admin">← Back to Dashboard</a>
-    <span>Editing: <strong>${site.title}</strong></span>
+    <a href="/admin">← 대시보드로 돌아가기</a>
+    <span>편집 중: <strong>${site.title}</strong></span>
   </nav>
   <div class="container">
     <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
       <div>
         <div class="card" style="background: #f0f9ff; border: 1px solid #bae6fd;">
-          <h2>Layout Settings</h2>
-          <p style="font-size: 0.9rem; color: var(--text-muted);">Reorder sections by dragging (not implemented) or editing the list below. Separate by comma.</p>
+          <h2>레이아웃 설정</h2>
+          <p style="font-size: 0.9rem; color: var(--text-muted);">아래 목록을 편집하여 섹션 순서를 변경하세요. 쉼표로 구분합니다.</p>
           <form action="/api/admin/sites/${site.slug}/layout" method="POST">
-             <label>Section Order</label>
+             <label>섹션 순서</label>
              <input type="text" name="order" value="${layoutConfig.join(',')}" placeholder="hero,about,business,product,location,board,contact" />
-             <button type="submit" class="btn" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Update Layout</button>
+             <button type="submit" class="btn" style="padding: 0.5rem 1rem; font-size: 0.9rem;">레이아웃 업데이트</button>
           </form>
         </div>
 
         <form action="/api/admin/sites/${site.slug}/content" method="POST">
           <div class="card">
-            <h2>Hero Section</h2>
-            <label>Headline</label>
-            <input type="text" name="hero_headline" value="${content.hero?.headline || ''}" />
-            <label>Subheadline</label>
-            <input type="text" name="hero_subheadline" value="${content.hero?.subheadline || ''}" />
+            <h2>히어로 섹션 (메인)</h2>
+            <label>헤드라인</label>
+            <input type="text" name="hero_headline" value="${content.hero?.headline || ''}" placeholder="비즈니스를 나타내는 멋진 문구" />
+            <label>서브 헤드라인</label>
+            <input type="text" name="hero_subheadline" value="${content.hero?.subheadline || ''}" placeholder="무엇을 하는 곳인지 짧게 설명" />
           </div>
 
           <div class="card">
-            <h2>About Section</h2>
-            <label>About Text</label>
-            <textarea name="about_text" rows="4">${content.about?.text || ''}</textarea>
+            <h2>회사 소개</h2>
+            <label>소개글</label>
+            <textarea name="about_text" rows="4" placeholder="회사의 이야기를 들려주세요...">${content.about?.text || ''}</textarea>
           </div>
 
           <div class="card">
-            <h2>Business Content</h2>
-            <label>Title</label>
+            <h2>사업 내용</h2>
+            <label>제목</label>
             <input type="text" name="business_title" value="${content.business?.title || ''}" />
-            <label>Content</label>
+            <label>내용</label>
             <textarea name="business_content" rows="4">${content.business?.content || ''}</textarea>
           </div>
 
           <div class="card">
-            <h2>Products</h2>
-            <label>Items (Format: Name|Price, one per line)</label>
-            <textarea name="product_items" rows="5" placeholder="Coffee|3.50\nBagel|2.00">${(content.product?.items || []).map((i: any) => `${i.name}|${i.price}`).join('\n')}</textarea>
+            <h2>상품 소개</h2>
+            <label>상품 목록 (형식: 이름|가격, 줄바꿈으로 구분)</label>
+            <textarea name="product_items" rows="5" placeholder="아메리카노|3,500원\n카페라떼|4,000원">${(content.product?.items || []).map((i: any) => `${i.name}|${i.price}`).join('\n')}</textarea>
           </div>
 
           <div class="card">
-            <h2>Location</h2>
-            <label>Address</label>
+            <h2>위치 정보</h2>
+            <label>주소</label>
             <input type="text" name="location_address" value="${content.location?.address || ''}" />
           </div>
 
           <div class="card">
-            <h2>Contact Settings</h2>
-            <label>Contact Email</label>
+            <h2>연락처 설정</h2>
+            <label>문의 받을 이메일</label>
             <input type="email" name="contact_email" value="${content.contact?.email || ''}" />
           </div>
 
-          <button type="submit" class="btn" style="width: 100%;">Save All Changes</button>
+          <button type="submit" class="btn" style="width: 100%;">모든 변경사항 저장</button>
         </form>
       </div>
 
       <div>
         <div class="card">
-          <h2>News / Board</h2>
+          <h2>공지사항 / 게시판</h2>
           <form action="/api/admin/sites/${site.slug}/posts" method="POST" style="margin-bottom: 2rem;">
-            <label>Title</label>
+            <label>제목</label>
             <input type="text" name="title" required />
-            <label>Content</label>
+            <label>내용</label>
             <textarea name="content" rows="3" required></textarea>
-            <button type="submit" class="btn" style="width: 100%;">Post News</button>
+            <button type="submit" class="btn" style="width: 100%;">게시글 작성</button>
           </form>
 
-          <h3>Recent Posts</h3>
-          ${posts.length === 0 ? '<p style="color: var(--text-muted);">No posts yet.</p>' : `
+          <h3>최근 게시글</h3>
+          ${posts.length === 0 ? '<p style="color: var(--text-muted);">아직 게시글이 없습니다.</p>' : `
             <ul style="list-style: none; padding: 0;">
               ${posts.map(post => `
                 <li style="border-bottom: 1px solid var(--border); padding: 0.5rem 0;">
@@ -269,31 +269,31 @@ const renderSection = (type: string, content: any, site: any, posts: any[]) => {
       return `
         <div class="hero">
           <h1>${content.hero?.headline || site.title}</h1>
-          <p>${content.hero?.subheadline || 'Welcome to our website'}</p>
+          <p>${content.hero?.subheadline || '저희 웹사이트에 오신 것을 환영합니다'}</p>
         </div>
       `;
     case 'about':
       return `
         <div class="section">
-          <h2>About Us</h2>
+          <h2>회사 소개</h2>
           <div style="max-width: 700px; margin: 0 auto; text-align: center;">
-            <p>${content.about?.text || 'Add your about text in the editor.'}</p>
+            <p>${content.about?.text || '에디터에서 회사 소개를 작성해주세요.'}</p>
           </div>
         </div>
       `;
     case 'business':
       return `
         <div class="section">
-          <h2>${content.business?.title || 'Our Business'}</h2>
+          <h2>${content.business?.title || '사업 내용'}</h2>
           <div style="max-width: 700px; margin: 0 auto; text-align: center;">
-            <p>${content.business?.content || 'Information about our business.'}</p>
+            <p>${content.business?.content || '사업에 대한 설명을 작성해주세요.'}</p>
           </div>
         </div>
       `;
     case 'product':
       return `
         <div class="section">
-          <h2>Our Products</h2>
+          <h2>상품 소개</h2>
           <div class="grid">
             ${(content.product?.items || []).length > 0 ?
           content.product.items.map((item: any) => `
@@ -302,7 +302,7 @@ const renderSection = (type: string, content: any, site: any, posts: any[]) => {
                   <p style="font-size: 1.25rem; font-weight: bold; color: var(--primary);">${item.price}</p>
                 </div>
               `).join('') :
-          '<p style="text-align: center; width: 100%;">No products listed yet.</p>'
+          '<p style="text-align: center; width: 100%;">등록된 상품이 없습니다.</p>'
         }
           </div>
         </div>
@@ -310,16 +310,16 @@ const renderSection = (type: string, content: any, site: any, posts: any[]) => {
     case 'location':
       return `
         <div class="section">
-          <h2>Location</h2>
+          <h2>오시는 길</h2>
           <div style="text-align: center;">
-            <p style="font-size: 1.2rem;">📍 ${content.location?.address || 'Contact us for location'}</p>
+            <p style="font-size: 1.2rem;">📍 ${content.location?.address || '주소를 입력해주세요'}</p>
           </div>
         </div>
       `;
     case 'board':
       return `
         <div class="section">
-          <h2>Latest News</h2>
+          <h2>공지사항</h2>
           <div class="grid">
             ${posts.length > 0 ?
           posts.map(post => `
@@ -329,7 +329,7 @@ const renderSection = (type: string, content: any, site: any, posts: any[]) => {
                   <p>${post.content}</p>
                 </div>
               `).join('') :
-          '<p style="text-align: center; width: 100%;">No news yet.</p>'
+          '<p style="text-align: center; width: 100%;">게시글이 없습니다.</p>'
         }
           </div>
         </div>
@@ -337,19 +337,19 @@ const renderSection = (type: string, content: any, site: any, posts: any[]) => {
     case 'contact':
       return `
         <div class="section" style="border-bottom: none;">
-          <h2>Contact Us</h2>
+          <h2>문의하기</h2>
           <div class="contact-form">
             <form action="/api/site/${site.slug}/lead" method="POST">
-              <label>Name</label>
+              <label>이름</label>
               <input type="text" name="name" required />
               
-              <label>Email</label>
+              <label>이메일</label>
               <input type="email" name="email" required />
               
-              <label>Message</label>
+              <label>메시지</label>
               <textarea name="message" rows="4" required></textarea>
               
-              <button type="submit">Send Message</button>
+              <button type="submit">메시지 보내기</button>
             </form>
           </div>
         </div>
@@ -361,7 +361,7 @@ const renderSection = (type: string, content: any, site: any, posts: any[]) => {
 
 export const userSiteTemplate = (site: any, content: any, posts: any[], layoutConfig: string[]) => `
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">

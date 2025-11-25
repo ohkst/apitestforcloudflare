@@ -136,6 +136,31 @@ export const dashboardTemplate = (sites: any[]) => layout('대시보드 - DLDesi
       <h1>내 사이트</h1>
       <button onclick="document.getElementById('createModal').showModal()" class="btn">새 사이트 만들기</button>
     </div>
+    <script>
+      const modal = document.getElementById('createModal')
+      document.getElementById('openModal').onclick = () => modal.showModal()
+      
+      async function deleteSite(slug, title) {
+        if (!confirm(\`정말로 "\${title}" 사이트를 삭제하시겠습니까?\\n\\n이 작업은 되돌릴 수 없으며, 모든 콘텐츠와 게시글이 삭제됩니다.\`)) {
+          return
+        }
+        
+        try {
+          const res = await fetch(\`/api/admin/sites/\${slug}\`, {
+            method: 'DELETE'
+          })
+          
+          if (res.ok) {
+            alert('사이트가 삭제되었습니다.')
+            window.location.reload()
+          } else {
+            alert('삭제 중 오류가 발생했습니다.')
+          }
+        } catch (err) {
+          alert('삭제 중 오류가 발생했습니다.')
+        }
+      }
+    </script>
 
     ${sites.length === 0 ? `
       <div class="card" style="text-align: center; padding: 4rem;">
@@ -149,8 +174,9 @@ export const dashboardTemplate = (sites: any[]) => layout('대시보드 - DLDesi
               <h3 style="margin: 0 0 0.5rem 0;">${site.title}</h3>
               <a href="/site/${site.slug}" target="_blank" style="color: var(--primary);">/site/${site.slug}</a>
             </div>
-            <div>
+            <div style="display: flex; gap: 0.5rem;">
               <a href="/admin/site/${site.slug}/edit" class="btn" style="background-color: white; color: var(--text); border: 1px solid var(--border);">편집</a>
+              <button onclick="deleteSite('${site.slug}', '${site.title}')" class="btn" style="background-color: #dc2626; color: white; border: none;">삭제</button>
             </div>
           </div>
         `).join('')}

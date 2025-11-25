@@ -91,6 +91,25 @@ app.post('/api/admin/sites', async (c) => {
     }
 })
 
+app.delete('/api/admin/sites/:slug', async (c) => {
+    const slug = c.req.param('slug')
+
+    try {
+        const site = await c.env.DB.prepare('SELECT id FROM sites WHERE slug = ?').bind(slug).first()
+        if (!site) return c.text('Site not found', 404)
+
+        // Delete related data
+        await c.env.DB.prepare('DELETE FROM leads WHERE site_id = ?').bind(site.id).run()
+        await c.env.DB.prepare('DELETE FROM posts WHERE site_id = ?').bind(site.id).run()
+        await c.env.DB.prepare('DELETE FROM site_content WHERE site_id = ?').bind(site.id).run()
+        await c.env.DB.prepare('DELETE FROM sites WHERE id = ?').bind(site.id).run()
+
+        return c.json({ success: true })
+    } catch (e: any) {
+        return c.text(`Error: ${e.message}`, 500)
+    }
+})
+
 app.get('/admin/site/:slug/edit', async (c) => {
     const slug = c.req.param('slug')
     const site = await c.env.DB.prepare('SELECT * FROM sites WHERE slug = ?').bind(slug).first()

@@ -90,7 +90,7 @@ export const layout = (title: string, content: string) => `
 export const landingTemplate = () => layout('PageMaker - Create Your Site', `
   <nav class="nav">
     <a href="/">PageMaker</a>
-    <a href="/admin">Login</a>
+    <a href="/admin">Dashboard</a>
   </nav>
   <div class="container" style="text-align: center; padding-top: 4rem;">
     <h1 style="font-size: 3.5rem; margin-bottom: 1.5rem; background: linear-gradient(to right, #2563eb, #9333ea); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
@@ -130,13 +130,13 @@ export const dashboardTemplate = (sites: any[]) => layout('Dashboard - PageMaker
     </div>
 
     \${sites.length === 0 ? `
-    < div class= "card" style = "text-align: center; padding: 4rem;" >
-    <p style="color: var(--text-muted);" > You haven't created any sites yet.</p>
-    </div>
-        ` : `
+  < div class= "card" style = "text-align: center; padding: 4rem;" >
+  <p style="color: var(--text-muted);" > You haven't created any sites yet.</p>
+  </div>
+    ` : `
 < div style = "display: grid; gap: 1.5rem;" >
 \${
-    sites.map(site => `
+  sites.map(site => `
           <div class="card" style="margin-bottom: 0; display: flex; justify-content: space-between; align-items: center;">
             <div>
               <h3 style="margin: 0 0 0.5rem 0;">\${site.title}</h3>
@@ -149,7 +149,7 @@ export const dashboardTemplate = (sites: any[]) => layout('Dashboard - PageMaker
         `).join('')
 }
 </div>
-    `}
+  `}
 
     <dialog id="createModal" style="border: none; border-radius: 1rem; padding: 2rem; width: 100%; max-width: 500px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
       <h2 style="margin-top: 0;">Create New Site</h2>

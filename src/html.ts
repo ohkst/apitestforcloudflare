@@ -304,6 +304,7 @@ export const editorTemplate = (site: any, content: any, posts: any[], layoutConf
       </div>
     </div>
   </div>
+  <script>document.querySelectorAll('input[type="text"][name$="_image"]').forEach(input=>{const wrapper=document.createElement('div');wrapper.style.cssText='margin-top:0.5rem;padding:1rem;border:2px dashed #e2e8f0;border-radius:0.5rem;text-align:center;cursor:pointer';wrapper.innerHTML='<span>이미지를 드래그하거나 클릭하여 업로드</span>';const fileInput=document.createElement('input');fileInput.type='file';fileInput.accept='image/*';fileInput.style.display='none';wrapper.onclick=()=>fileInput.click();wrapper.ondragover=(e)=>{e.preventDefault();wrapper.style.borderColor='#2563eb'};wrapper.ondragleave=()=>{wrapper.style.borderColor='#e2e8f0'};wrapper.ondrop=async(e)=>{e.preventDefault();const file=e.dataTransfer.files[0];if(file){wrapper.innerHTML='<span>업로드 중...</span>';const formData=new FormData();formData.append('image',file);const res=await fetch('/api/upload',{method:'POST',body:formData});const data=await res.json();if(data.url){input.value=data.url;wrapper.innerHTML='<span style="color:green;">✓ 완료</span>'}}};fileInput.onchange=async(e)=>{wrapper.ondrop({preventDefault:()=>{},dataTransfer:{files:[e.target.files[0]]}})};input.parentNode.insertBefore(wrapper,input.nextSibling);input.parentNode.insertBefore(fileInput,wrapper.nextSibling)})</script>
 `);
 
 const renderSection = (type: string, content: any, site: any, posts: any[]) => {

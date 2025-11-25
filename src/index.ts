@@ -4,6 +4,7 @@ import { landingTemplate, dashboardTemplate, editorTemplate, userSiteTemplate } 
 
 type Bindings = {
     DB: D1Database
+    BUCKET: R2Bucket
 }
 
 const app = new Hono<{ Bindings: Bindings }>()

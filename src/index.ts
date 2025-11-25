@@ -19,6 +19,37 @@ app.get('/', (c) => {
 
 // --- Admin / Dashboard Routes ---
 
+app.post('/api/upload', async (c) => {
+    try {
+        const formData = await c.req.formData()
+        const file = formData.get('image')
+        if (!file || typeof file === 'string') {
+            return c.json({ error: 'Image required' }, 400)
+        }
+        const timestamp = Date.now()
+        const ext = (file as File).name.split('.').pop()
+        const filename = `${timestamp}-${Math.random().toString(36).substring(7)}.${ext}`
+        await c.env.BUCKET.put(filename, (file as File), {
+            httpMetadata: { contentType: (file as File).type }
+        })
+        return c.json({ url: `/api/images/${filename}` })
+    } catch (error: any) {
+        return c.json({ error: error.message }, 500)
+    }
+})
+
+app.get('/api/images/:filename', async (c) => {
+    const filename = c.req.param('filename')
+    const object = await c.env.BUCKET.get(filename)
+    if (!object) return c.notFound()
+    return new Response(object.body, {
+        headers: {
+            'Content-Type': object.httpMetadata?.contentType || 'image/jpeg',
+            'Cache-Control': 'public, max-age=31536000'
+        }
+    })
+})
+
 app.get('/admin', async (c) => {
     const { results } = await c.env.DB.prepare('SELECT * FROM sites WHERE user_id = ? ORDER BY created_at DESC').bind(1).all()
     return c.html(dashboardTemplate(results))
